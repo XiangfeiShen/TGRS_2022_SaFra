@@ -1,0 +1,102 @@
+close all
+clear
+time=[];
+dc=1;
+for ii=1:length(dc)
+    switch (num2str(dc(ii)))
+        case '1';load sandiego;dctype='sandiego';
+    end
+    
+    [Y,data,label,nr,nc,nb,L,N,anomaly_map,normal_map,f_show]=ppData(data,map);
+   
+
+    
+    tic
+    [Smafra]=runSaFraV1(Y,data,label,dctype);
+    time=toc;
+    [AUCpdpf,AUCpdtau,AUCpftau,Pf,Pd]=clcAUCv1(label,Smafra);
+    
+    %% -------Map
+
+    figure;
+    tau = sort(Smafra,'descend');plot3(Pf,tau',Pd,'-r','LineWidth',1);
+% 
+    axis([0, 1, 0, 1, 0, 1]);
+    set(gca,'XTick',(0:0.2:1),'fontsize',16);
+    set(gca,'YTick',(0:0.2:1),'fontsize',16);
+    set(gca,'ZTick',(0:0.2:1),'fontsize',16);
+    xlabel('P_{f}','fontsize',18) ; ylabel('\tau','fontsize',18); zlabel('P_{d}','fontsize',18);
+    grid on;
+    ax = gca;
+    ax.BoxStyle = 'full';
+    box on;
+    
+    
+    
+    
+    Mrx=reshape(Srx',nr,nc,1);
+    Msrx=reshape(Ssrx',nr,nc,1);
+    Mgae=reshape(Sgae',nr,nc,1);
+    Mrgae=reshape(Srgae',nr,nc,1);
+    Mpta=reshape(Spta',nr,nc,1);
+%     Mlartvad=reshape(Slartvad',nr,nc,1);
+    Mlrsr=reshape(Slrsr',nr,nc,1);
+    Mgtvlrr=reshape(Sgtvlrr',nr,nc,1);
+    Mlsctv=reshape(Slsctv',nr,nc,1);
+%     Mlrsncr=reshape(Slrsncr',nr,nc,1);
+    Mmafra=reshape(Smafra',nr,nc,1);
+    
+%     figure
+%     subplot_tight(1, 13, 1,[.08 .08]); imagesc(f_show,[0,1]);  axis image;axis off;
+%     subplot_tight(1, 13, 2,[.08 .08]); imagesc(map,[0,1]);  axis image;axis off;
+%     subplot_tight(1, 13, 3,[.08 .08]); imagesc(Mrx,[0,1]);  axis image;axis off;
+%     subplot_tight(1, 13, 4,[.08 .08]); imagesc(Msrx,[0,1]);  axis image;axis off;
+%     subplot_tight(1, 13, 5,[.08 .08]); imagesc(Mgae,[0,1]);  axis image;axis off;
+%     subplot_tight(1, 13, 6,[.08 .08]); imagesc(Mrgae,[0,1]);  axis image;axis off;
+%     subplot_tight(1, 13, 7,[.08 .08]); imagesc(Mpta,[0,1]);  axis image;axis off;
+%     subplot_tight(1, 13, 8,[.08 .08]); imagesc(Mlartvad,[0,1]);  axis image;axis off;
+%     subplot_tight(1, 13, 9,[.08 .08]); imagesc(Mlrsr,[0,1]);  axis image;axis off;
+%     subplot_tight(1, 13, 10,[.08 .08]); imagesc(Mgtvlrr,[0,1]);  axis image;axis off;
+%     subplot_tight(1, 13, 11,[.08 .08]); imagesc(Mlsctv,[0,1]);  axis image;axis off;
+%     subplot_tight(1, 13, 12,[.08 .08]); imagesc(Mlrsncr,[0,1]);  axis image;axis off;
+%     subplot_tight(1, 13, 13,[.08 .08]); imagesc(Mmafra,[0,1]);  axis image;axis off;
+    
+    
+    
+    
+    %% -------Display
+    
+    figure
+    semilogx(Pf1, Pd1, '-', 'LineWidth', 2);  hold on
+    semilogx(Pf2, Pd2, 'k-', 'LineWidth', 2);
+    semilogx(Pf3, Pd3, 'y-', 'LineWidth', 2);
+    semilogx(Pf4, Pd4, 'b-', 'LineWidth', 2);
+    semilogx(Pf5, Pd5, 'c-', 'LineWidth', 2);
+    semilogx(Pf6, Pd6, 'g-', 'LineWidth', 2);
+    semilogx(Pf7, Pd7, 'm-', 'LineWidth', 2);
+    semilogx(Pf8, Pd8, 'r-', 'LineWidth', 2);
+    semilogx(Pf9, Pd9, '-', 'LineWidth', 2);
+%     semilogx(Pf10, Pd10, '-', 'LineWidth', 2);
+%     semilogx(Pf11, Pd11, '-', 'LineWidth', 2);
+    xlabel('False Alarm Rate'); ylabel('Probability of Detection');
+    legend('RX','Seg-RX','GAE','RGAE','LRSR','GTVLRR','LSC-TV','PTA','Ours','location','northwest')
+    set(gca,'Fontname','arial')
+    %axis([0,0.07,0.6,1])
+    set(gca,'FontSize',12);
+    grid on
+    
+    AUC=AUC*100;
+    
+    %% Save
+    t=datetime;
+    filename= strcat('ALL_V2_',num2str(dctype),'_[',num2str(t.Day), ...
+        'd_',num2str(t.Hour),'h_',num2str(t.Minute), 'm].mat');
+    save(['D:\Program Files\MATLAB\R2016a\a.phil\8.AnomalyDetection\Framelet_HSI_AD_Demo\SuppliedDemos\ResultsFinal\',filename],...
+        'Y','data','Dict','label','f_show','map',...
+        'AUC','time',...
+        'Pd1','Pd2','Pd3','Pd4','Pd5','Pd6','Pd7','Pd8','Pd9',...
+        'Pf1','Pf2','Pf3','Pf4','Pf5','Pf6','Pf7','Pf8','Pf9',...
+        'Mrx','Msrx','Mrgae','Mgae','Mpta','Mlrsr','Mlsctv','Mgtvlrr','Mmafra')
+    
+    
+end
